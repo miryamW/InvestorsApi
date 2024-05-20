@@ -1,10 +1,7 @@
-from dataclasses import Field
-from typing import Optional
-
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 
 
 class User(BaseModel):
     id: int
-    username: str
-    password: str
+    username: constr(min_length=1, pattern='^[a-zA-Z]+$')
+    password: constr(min_length=8, pattern='^[^\\s]+$')

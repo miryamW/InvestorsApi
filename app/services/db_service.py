@@ -1,6 +1,8 @@
+from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://localhost:27017/")
+client = AsyncIOMotorClient('mongodb://localhost:27017')
 
-db = client['InvestorsData']
+db = client['UsersDubgetData']
 users = db['users']
+operations = db['operations']
