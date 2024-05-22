@@ -9,7 +9,7 @@ from app.services import users_service
 
 
 async def get_operation_by_id(operation_id):
-    operation =await  operations.find_one({"id": operation_id})
+    operation = await  operations.find_one({"id": operation_id})
     return Operation(**operation)
 
 
@@ -17,10 +17,9 @@ async def get_operation_by_id(operation_id):
 
 
 async def get_all_operations(user_id: int):
-    all_operations = await operations.find({"userId": user_id})
-    operations_list = [Operation(**operation) for operation in list(all_operations)]
-    return operations_list
-
+    cursor = operations.find({"userId": int(user_id)})
+    all_operations = await cursor.to_list(None)
+    return all_operations
 
 """get all operations for specific user between dates range"""
 
@@ -28,13 +27,14 @@ async def get_all_operations(user_id: int):
 async def get_all_operations_between_dates(user_id: int, start_date: str, end_date: str):
     start_date_time = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_time = datetime.strptime(end_date, "%Y-%m-%d")
-    operations_in_range = await operations.find({"userId": user_id, "date": {"$gte": start_date_time, "$lte": end_date_time}})
-    operations_in_range_list = [Operation(**operation) for operation in list(operations_in_range)]
-    return operations_in_range_list
+    cursor = operations.find(
+        {"userId": user_id, "date": {"$gte": start_date_time, "$lte": end_date_time}}
+    )
+    operations_in_range_list = await cursor.to_list(None)  # None means no limit on the number of documents
 
-
+    # Assuming Operation is a class that can be instantiated with keyword arguments
+    return [Operation(**operation) for operation in operations_in_range_list]
 """add operation to db"""
-
 
 async def add_operation(operation: Operation):
     operation_id = await get_operation_id()
@@ -43,7 +43,7 @@ async def add_operation(operation: Operation):
         "sum": operation.sum,
         "userId": operation.userId,
         "type": operation.type.value,
-        "date": datetime.now()
+        "date": operation.date
     })
     new_operation_created = await operations.find_one({"id": operation_id})
     if new_operation_created:
@@ -58,7 +58,7 @@ async def update_operation(operation_id: int, operation: Operation):
     await operations.update_one({"id": operation_id}, {
         "$set": {"sum": operation.sum, "userId": operation.userId, "type": operation.type, "date": operation.date}})
     updated_operation = operations.find_one({"sum": operation.sum, "userId": operation.userId, "type": operation.type,
-                                                 "date": operation.date})
+                                             "date": operation.date})
     if updated_operation:
         return True
     return False

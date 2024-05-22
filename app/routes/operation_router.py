@@ -48,8 +48,8 @@ async def get_operation(request: Request, operation_id: int):
 
 @operation_router.post("/")
 @log
-def add(request: Request, operation: Operation):
-    is_added = operations_service.add_operation(operation)
+async def add_operation(request: Request, operation: Operation):
+    is_added = await operations_service.add_operation(operation)
     if is_added:
         return "operation added successfully"
     raise HTTPException(status_code=404, detail="one or more of your details was not valid, please try again")
@@ -57,9 +57,9 @@ def add(request: Request, operation: Operation):
 
 @operation_router.put("/{id}")
 @log
-def update_operation(request: Request, operation_id: int, operation: Operation):
+async def update_operation(request: Request, operation_id: int, operation: Operation):
     try:
-        is_updated = operations_service.update_operation(operation_id, operation)
+        is_updated = await operations_service.update_operation(operation_id, operation)
     except Exception as e:
         raise e
     if is_updated:
@@ -69,7 +69,7 @@ def update_operation(request: Request, operation_id: int, operation: Operation):
 
 @operation_router.delete("/{id}")
 @log
-async def delete_profile(request: Request, operation_id: int):
+async def delete_operation(request: Request, operation_id: int):
     is_deleted = await operations_service.delete_operation(operation_id)
     if is_deleted:
         return "operation were deleted successfully"

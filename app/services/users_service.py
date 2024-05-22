@@ -1,5 +1,5 @@
 from pymongo import DESCENDING
-
+from app.services.db_service import synchronise_users
 from app.models.user import User
 from app.services.db_service import users
 
@@ -34,8 +34,8 @@ async def signup(new_user: User):
 
 async def update_user_profile(user_id: int, user: User):
     await users.update_one({"id": user_id}, {"$set": {"username": user.username, "password": user.password}})
-    user_updated = users.find_one({"id": user_id, "username": user.username, "password": user.password})
-    return user_updated
+    user_updated = await users.find_one({"id": user_id, "username": user.username, "password": user.password})
+    return User(**user_updated)
 
 
 """get the next user id that available"""
@@ -52,5 +52,5 @@ async def get_user_id():
 """"get user by id"""
 
 
-async def get_user_by_id(user_id: int):
-    return await users.find_one({"id": user_id})
+def get_user_by_id(user_id: int):
+    return synchronise_users.find_one({"id": user_id})

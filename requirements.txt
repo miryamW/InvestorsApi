@@ -3,3 +3,5 @@ fastapi~=0.111.0
 pydantic~=2.7.1
 pymongo~=4.7.2
 motor~=3.4.0
+DateTime~=5.5
+pytest~=8.2.1

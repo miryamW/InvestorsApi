@@ -20,7 +20,6 @@ class Operation(BaseModel):
     @field_validator('userId')
     def check_user_id(cls, userId):
         user = users_service.get_user_by_id(userId)
-        print(user)
         if not user:
             raise ValueError('user does not exist')
         return userId
