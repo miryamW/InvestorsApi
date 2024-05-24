@@ -1,6 +1,8 @@
 import io
 from datetime import datetime
 
+from starlette.responses import StreamingResponse
+
 from app.models.operation import Operation
 from app.models.operation_type import Operation_type
 from app.services import operations_service
@@ -54,8 +56,7 @@ async def get_yearly_graph(user_id: int):
     plt.savefig(buf, format='png')
     buf.seek(0)
     plt.close(fig)
-    return buf
-
+    return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
 
 def get_bar_expenses_vs_revenues_by_months(expenses: list, revenues: list, months: list):
     fig, ax = plt.subplots()
@@ -78,7 +79,7 @@ def get_bar_expenses_vs_revenues_by_months(expenses: list, revenues: list, month
     buf.seek(0)
     plt.close(fig)
 
-    return buf
+    return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
 
 
 async def get_expenses_and_revenues_divide_to_months(user_id: int):
