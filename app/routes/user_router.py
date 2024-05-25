@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, APIRouter, HTTPException,Request
+from fastapi import APIRouter, HTTPException,Request
 
 from app.middlewares.log import log
 from app.services import users_service

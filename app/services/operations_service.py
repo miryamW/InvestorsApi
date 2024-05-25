@@ -9,7 +9,7 @@ from app.services import users_service
 
 
 async def get_operation_by_id(operation_id):
-    operation = await  operations.find_one({"id": operation_id})
+    operation = await operations.find_one({"id": operation_id})
     return Operation(**operation)
 
 
@@ -19,7 +19,7 @@ async def get_operation_by_id(operation_id):
 async def get_all_operations(user_id: int):
     cursor = operations.find({"userId": int(user_id)})
     all_operations = await cursor.to_list(None)
-    return all_operations
+    return [Operation(**operation) for operation in all_operations]
 
 """get all operations for specific user between dates range"""
 

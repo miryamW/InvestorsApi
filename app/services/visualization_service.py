@@ -1,94 +1,121 @@
+
 import io
 from datetime import datetime
-
 from starlette.responses import StreamingResponse
-
-from app.models.operation import Operation
 from app.models.operation_type import Operation_type
 from app.services import operations_service
-
 import matplotlib.pyplot as plt
 
-months_names = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-]
-months_length = [31,28,31,30,31,30,31,31,30,31,30,31]
+months_names = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December']
+months_length = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+
+async def fetch_operations(user_id: int, start_date: str = None, end_date: str = None):
+    if start_date and end_date:
+        return await operations_service.get_all_operations_between_dates(user_id, start_date, end_date)
+    return await operations_service.get_all_operations(user_id)
+
+
+def calculate_sums(operations, operation_type):
+    return sum(op.sum for op in operations if op.type == operation_type)
+
+
+async def get_expenses_and_revenues_by_month(user_id: int, month: str = None):
+    if month:
+        year = datetime.now().year
+        start_date = f"{year}-{month}-1"
+        end_date = f"{year}-{month}-{months_length[int(month) - 1]}"
+        data = await fetch_operations(user_id, start_date, end_date)
+    else:
+        data = await fetch_operations(user_id)
+
+    expenses = [0] * 12
+    revenues = [0] * 12
+
+    for operation_ in data:
+        month_index = operation_.date.month - 1
+        if operation_.type == Operation_type.REVENUE:
+            revenues[month_index] += operation_.sum
+        if operation_.type == Operation_type.EXPENSE:
+            expenses[month_index] += operation_.sum
+
+    return expenses, revenues
+
+
+def create_plot(x, y_data, labels, title, ylabel):
+    fig, ax = plt.subplots()
+    for y, label in zip(y_data, labels):
+        ax.plot(x, y, label=label, marker='o')
+    plt.xticks(rotation=45)
+    ax.set_xlabel('Month')
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.legend()
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    plt.close(fig)
+    return buf
+
+
+def create_bar_chart(x, y_data, labels, title, ylabel):
+    fig, ax = plt.subplots()
+    bar_width = 0.35
+    index = range(len(x))
+    for i, (y, label) in enumerate(zip(y_data, labels)):
+        ax.bar([p + i * bar_width for p in index], y, bar_width, label=label)
+    plt.xticks(rotation=45)
+    ax.set_xlabel('Month')
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.set_xticks([p + bar_width for p in index])
+    ax.set_xticklabels(x)
+    ax.legend()
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    plt.close(fig)
+    return buf
 
 
 async def get_expenses_against_revenues_by_month(user_id: int, month: str):
-    data = await operations_service.get_all_operations_between_dates(user_id, f"{datetime.now().year}-{month}-1",
-                                                                     f"{datetime.now().year}-{month}-{months_length[int(month)-1]}")
-    revenues = []
-    expenses = []
-    for operation_ in data:
-        if operation_.type == Operation_type.REVENUE:
-            revenues.append(operation_.sum)
-        if operation_.type == Operation_type.EXPENSE:
-            expenses.append(operation_.sum)
-    expenses = sum(expenses)
-    revenues = sum(revenues)
-    months = [months_names[int(month)]]
-    return get_bar_expenses_vs_revenues_by_months([expenses], [revenues], months)
+    expenses, revenues = await get_expenses_and_revenues_by_month(user_id, month)
+    month_name = [months_names[int(month) - 1]]
+    buf = create_bar_chart(month_name, [expenses, revenues], ['Expenses', 'Revenues'],
+                           'Monthly Expenses vs Revenues', 'Value')
+    return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
 
 
-async def get_expenses_against_revenues_by_month_all_years(user_id: int):
-    (expenses, revenues) = await get_expenses_and_revenues_divide_to_months(user_id)
-    return get_bar_expenses_vs_revenues_by_months(expenses, revenues, months_names)
+async def get_expenses_against_revenues_by_month_all_year(user_id: int):
+    expenses, revenues = await get_expenses_and_revenues_by_month(user_id)
+    buf = create_bar_chart(months_names, [expenses, revenues], ['Expenses', 'Revenues'],
+                           'Monthly Expenses vs Revenues', 'Value')
+    return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
 
 
 async def get_yearly_graph(user_id: int):
-    (expenses, revenues) = await get_expenses_and_revenues_divide_to_months(user_id)
-    fig, ax = plt.subplots()
-    ax.plot(months_names, expenses, label='Expenses', marker='o')
-    ax.plot(months_names, revenues, label='Revenues', marker='o')
-
-    ax.set_xlabel('Month')
-    ax.set_ylabel('Value')
-    ax.set_title('Monthly Expenses vs Revenues')
-    ax.legend()
-
-    # Rotate the x-axis labels for better readability
-    plt.xticks(rotation=45)
-
-    # Save the plot to a BytesIO object
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    plt.close(fig)
-    return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
-
-def get_bar_expenses_vs_revenues_by_months(expenses: list, revenues: list, months: list):
-    fig, ax = plt.subplots()
-    bar_width = 0.35
-    index = range(len(months))
-
-    bar1 = ax.bar(index, expenses, bar_width, label='Expenses')
-    bar2 = ax.bar([i + bar_width for i in index], revenues, bar_width, label='Revenues')
-    plt.xticks(rotation=45)
-
-    ax.set_xlabel('Month')
-    ax.set_ylabel('Value')
-    ax.set_title('Monthly Expenses vs Revenues')
-    ax.set_xticks([i + bar_width / 2 for i in index])
-    ax.set_xticklabels(months)
-    ax.legend()
-
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    plt.close(fig)
-
+    expenses, revenues = await get_expenses_and_revenues_by_month(user_id)
+    buf = create_plot(months_names, [expenses, revenues], ['Expenses', 'Revenues'],
+                      'Monthly Expenses vs Revenues', 'Value')
     return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
 
 
-async def get_expenses_and_revenues_divide_to_months(user_id: int):
-    data = await operations_service.get_all_operations(user_id)
-    revenues = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    expenses = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    for operation_ in data:
-        if Operation(**operation_).type == Operation_type.REVENUE:
-            revenues[Operation(**operation_).date.month-1] = Operation(**operation_).sum + revenues[Operation(**operation_).date.month]
-        if Operation(**operation_).type == Operation_type.EXPENSE:
-            expenses[Operation(**operation_).date.month-1] = Operation(**operation_).sum + expenses[Operation(**operation_).date.month]
-    return expenses, revenues
+async def get_balance_divide_to_months(user_id: int):
+    expenses, revenues = await get_expenses_and_revenues_by_month(user_id)
+    balances = [revenue - expense for expense, revenue in zip(expenses, revenues)]
+    return balances
+
+
+async def get_balances_yearly_graph(user_id: int):
+    balances = await get_balance_divide_to_months(user_id)
+    buf = create_plot(months_names, [balances], ['Balance'],
+                      'Monthly Balance', 'Value')
+    return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
+
+
+async def get_balance_yearly_bar(user_id: int):
+    balances = await get_balance_divide_to_months(user_id)
+    buf = create_bar_chart(months_names, [balances], ['Monthly Balance'],
+                           'Monthly Balance', 'Value')
+    return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
