@@ -5,7 +5,15 @@ from app.services.db_service import users
 
 
 async def signin(user: User):
-    """sign in with user name and password"""
+    """
+    Sign in a user with the provided username and password.
+
+    Args:
+        user (User): The user object containing username and password.
+
+    Returns:
+        bool: True if sign in successful, False otherwise.
+    """
 
     existing_user = await users.find_one({"username": user.username, "password": user.password})
     if existing_user:
@@ -14,7 +22,15 @@ async def signin(user: User):
 
 
 async def signup(new_user: User):
-    """sign up user"""
+    """
+    Sign up a new user with the provided username and password.
+
+    Args:
+        new_user (User): The user object containing username and password for the new user.
+
+    Returns:
+        bool: True if sign up successful, False otherwise.
+    """
 
     user_id = await get_user_id()
     users.insert_one({
@@ -29,7 +45,16 @@ async def signup(new_user: User):
 
 
 async def update_user_profile(user_id: int, user: User):
-    """update user's details"""
+    """
+    Update user's details with the provided user ID.
+
+    Args:
+        user_id (int): The ID of the user to update.
+        user (User): The user object containing updated details.
+
+    Returns:
+        User: The updated user object.
+    """
 
     await users.update_one({"id": user_id}, {"$set": {"username": user.username, "password": user.password}})
     user_updated = await users.find_one({"id": user_id, "username": user.username, "password": user.password})
@@ -37,7 +62,12 @@ async def update_user_profile(user_id: int, user: User):
 
 
 async def get_user_id():
-    """get the next user id that available"""
+    """
+    Get the next available user ID.
+
+    Returns:
+        int: The next available user ID.
+    """
 
     max_id_user = await users.find_one({}, sort=[("id", DESCENDING)])
     if max_id_user:
@@ -47,6 +77,14 @@ async def get_user_id():
 
 
 def get_user_by_id(user_id: int):
-    """"get user by id"""
+    """
+    Retrieve a user by their ID.
+
+    Args:
+        user_id (int): The ID of the user to retrieve.
+
+    Returns:
+        dict: The user document from the database.
+    """
 
     return synchronise_users.find_one({"id": user_id})

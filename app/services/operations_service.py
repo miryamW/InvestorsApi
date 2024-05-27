@@ -7,35 +7,71 @@ from app.services import users_service
 
 
 async def get_operation_by_id(operation_id):
-    """get operation by id"""
+    """
+    Retrieve an operation by its ID.
+
+    Args:
+        operation_id (int): The ID of the operation to retrieve.
+
+    Returns:
+        Operation: The operation object if found, else None.
+    """
 
     operation = await operations.find_one({"id": operation_id})
-    return Operation(**operation)
+    if operation:
+        return Operation(**operation)
+    return None
 
 
 async def get_all_operations(user_id: int):
-    """get all operations for specific user"""
-    cursor = operations.find({"userId": int(user_id)})
+    """
+    Retrieve all operations for a specific user.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Returns:
+        List[Operation]: A list of operation objects.
+    """
+
+    cursor = operations.find({"userId": user_id})
     all_operations = await cursor.to_list(None)
     return [Operation(**operation) for operation in all_operations]
 
 
 async def get_all_operations_between_dates(user_id: int, start_date: str, end_date: str):
-    """get all operations for specific user between dates range"""
+    """
+    Retrieve all operations for a specific user between a date range.
+
+    Args:
+        user_id (int): The ID of the user.
+        start_date (str): The start date of the range in format 'YYYY-MM-DD'.
+        end_date (str): The end date of the range in format 'YYYY-MM-DD'.
+
+    Returns:
+        List[Operation]: A list of operation objects.
+    """
 
     start_date_time = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_time = datetime.strptime(end_date, "%Y-%m-%d")
     cursor = operations.find(
         {"userId": user_id, "date": {"$gte": start_date_time, "$lte": end_date_time}}
     )
-    operations_in_range_list = await cursor.to_list(None)  # None means no limit on the number of documents
+    operations_in_range_list = await cursor.to_list(None)
 
-    # Assuming Operation is a class that can be instantiated with keyword arguments
     return [Operation(**operation) for operation in operations_in_range_list]
 
 
 async def add_operation(operation: Operation):
-    """add operation to db"""
+    """
+    Add an operation to the database.
+
+    Args:
+        operation (Operation): The operation object to add.
+
+    Returns:
+        bool: True if operation added successfully, else False.
+    """
 
     operation_id = await get_operation_id()
     operations.insert_one({
@@ -52,19 +88,35 @@ async def add_operation(operation: Operation):
 
 
 async def update_operation(operation_id: int, operation: Operation):
-    """update operation properties"""
+    """
+    Update properties of an operation.
+
+    Args:
+        operation_id (int): The ID of the operation to update.
+        operation (Operation): The updated operation object.
+
+    Returns:
+        bool: True if operation updated successfully, else False.
+    """
 
     await operations.update_one({"id": operation_id}, {
-        "$set": {"sum": operation.sum, "userId": operation.userId, "type": operation.type, "date": operation.date}})
-    updated_operation = operations.find_one({"sum": operation.sum, "userId": operation.userId, "type": operation.type,
-                                             "date": operation.date})
+        "$set": {"sum": operation.sum, "userId": operation.userId, "type": operation.type.value, "date": operation.date}})
+    updated_operation = operations.find_one({"id": operation_id})
     if updated_operation:
         return True
     return False
 
 
 async def delete_operation(operation_id: int):
-    """delete operation"""
+    """
+    Delete an operation.
+
+    Args:
+        operation_id (int): The ID of the operation to delete.
+
+    Returns:
+        bool: True if operation deleted successfully, else False.
+    """
 
     await operations.delete_one({"id": operation_id})
     if get_operation_by_id(operation_id):
@@ -73,7 +125,12 @@ async def delete_operation(operation_id: int):
 
 
 async def get_operation_id():
-    """get next operation id"""
+    """
+    Get the next available operation ID.
+
+    Returns:
+        int: The next operation ID.
+    """
 
     max_id_operation = await operations.find_one({}, sort=[("id", DESCENDING)])
     if max_id_operation:

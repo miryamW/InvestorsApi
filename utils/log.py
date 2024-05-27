@@ -1,7 +1,6 @@
 import logging
 from functools import wraps
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
+from fastapi import Request
 from typing import Callable
 
 # Configure logging
@@ -9,9 +8,30 @@ logging.basicConfig(filename='app.log', level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
-def log(func: Callable):
+def log(func: Callable) -> Callable:
+    """
+    Decorator function to log information about function calls and their return values.
+
+    Parameters:
+    - func (Callable): The function to be decorated.
+
+    Returns:
+    - Callable: The wrapper function that adds logging functionality.
+    """
+
     @wraps(func)
     async def wrapper(request: Request, *args, **kwargs):
+        """
+        Wrapper function that logs function calls and their return values.
+
+        Parameters:
+        - request (Request): The FastAPI request object.
+        - *args: Positional arguments passed to the decorated function.
+        - **kwargs: Keyword arguments passed to the decorated function.
+
+        Returns:
+        - Any: The return value of the decorated function.
+        """
         # Log the request method and path
         logging.info(f"Request: {request.method} {request.url.path}")
 
