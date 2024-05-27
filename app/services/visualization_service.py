@@ -12,6 +12,7 @@ months_names = ['January', 'February', 'March', 'April', 'May', 'June',
 # List of the number of days in each month
 months_length = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
+
 async def fetch_operations(user_id: int, start_date: str = None, end_date: str = None):
     """
     Fetches operations for a given user, optionally within a specified date range.
@@ -28,6 +29,7 @@ async def fetch_operations(user_id: int, start_date: str = None, end_date: str =
         return await operations_service.get_all_operations_between_dates(user_id, start_date, end_date)
     return await operations_service.get_all_operations(user_id)
 
+
 def calculate_sums(operations, operation_type):
     """
     Calculates the sum of operations of a given type.
@@ -40,6 +42,7 @@ def calculate_sums(operations, operation_type):
     - int: Sum of the specified type of operations.
     """
     return sum(op.sum for op in operations if op.type == operation_type)
+
 
 async def get_expenses_and_revenues_by_month(user_id: int, month: str = None):
     """
@@ -72,6 +75,7 @@ async def get_expenses_and_revenues_by_month(user_id: int, month: str = None):
 
     return expenses, revenues
 
+
 def create_plot(x, y_data, labels, title, ylabel):
     """
     Creates a line plot with the given data.
@@ -99,6 +103,7 @@ def create_plot(x, y_data, labels, title, ylabel):
     buf.seek(0)
     plt.close(fig)
     return buf
+
 
 def create_bar_chart(x, y_data, labels, title, ylabel):
     """
@@ -132,6 +137,7 @@ def create_bar_chart(x, y_data, labels, title, ylabel):
     plt.close(fig)
     return buf
 
+
 async def get_expenses_against_revenues_by_month(user_id: int, month: str):
     """
     Generates a bar chart comparing expenses and revenues for a specific month.
@@ -149,6 +155,7 @@ async def get_expenses_against_revenues_by_month(user_id: int, month: str):
                            'Monthly Expenses vs Revenues', 'Value')
     return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
 
+
 async def get_expenses_against_revenues_by_month_all_year(user_id: int):
     """
     Generates a bar chart comparing expenses and revenues for each month of the year.
@@ -163,6 +170,7 @@ async def get_expenses_against_revenues_by_month_all_year(user_id: int):
     buf = create_bar_chart(months_names, [expenses, revenues], ['Expenses', 'Revenues'],
                            'Monthly Expenses vs Revenues', 'Value')
     return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
+
 
 async def get_yearly_graph(user_id: int):
     """
@@ -179,6 +187,7 @@ async def get_yearly_graph(user_id: int):
                       'Monthly Expenses vs Revenues', 'Value')
     return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
 
+
 async def get_balance_divide_to_months(user_id: int):
     """
     Calculates the monthly balance for a given user.
@@ -192,6 +201,7 @@ async def get_balance_divide_to_months(user_id: int):
     expenses, revenues = await get_expenses_and_revenues_by_month(user_id)
     balances = [revenue - expense for expense, revenue in zip(expenses, revenues)]
     return balances
+
 
 async def get_balances_yearly_graph(user_id: int):
     """
@@ -207,6 +217,7 @@ async def get_balances_yearly_graph(user_id: int):
     buf = create_plot(months_names, [balances], ['Balance'],
                       'Monthly Balance', 'Value')
     return StreamingResponse(io.BytesIO(buf.read()), media_type="image/png")
+
 
 async def get_balance_yearly_bar(user_id: int):
     """

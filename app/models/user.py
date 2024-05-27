@@ -1,5 +1,6 @@
 from pydantic import BaseModel, constr
 
+
 class User(BaseModel):
     """
     Model representing a user entity.

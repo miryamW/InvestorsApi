@@ -107,7 +107,6 @@ async def test_get_operation_by_id(operation_data):
     Args:
         operation_data (Operation): Sample operation data provided by the operation_data fixture.
     """
-    date = operation_data.date
     current_id = await operations_service.get_operation_id()
     result = await operations_service.get_operation_by_id(current_id - 1)
     assert {k: v for k, v in result.__dict__.items() if k != "date"} == {

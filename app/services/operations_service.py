@@ -1,9 +1,7 @@
 from datetime import datetime
-from fastapi import HTTPException
 from pymongo import DESCENDING
 from app.models.operation import Operation
 from app.services.db_service import operations
-from app.services import users_service
 
 
 async def get_operation_by_id(operation_id):
@@ -100,7 +98,8 @@ async def update_operation(operation_id: int, operation: Operation):
     """
 
     await operations.update_one({"id": operation_id}, {
-        "$set": {"sum": operation.sum, "userId": operation.userId, "type": operation.type.value, "date": operation.date}})
+        "$set": {"sum": operation.sum, "userId": operation.userId, "type": operation.type.value,
+                 "date": operation.date}})
     updated_operation = operations.find_one({"id": operation_id})
     if updated_operation:
         return True

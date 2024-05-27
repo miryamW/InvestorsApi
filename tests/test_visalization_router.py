@@ -5,6 +5,7 @@ from app.routes.visualization_router import visualization_router
 # Create a test client for the visualization router.
 client = TestClient(visualization_router)
 
+
 # Test the endpoint for retrieving the monthly budget.
 def test_get_monthlyBudget():
     """
@@ -12,6 +13,7 @@ def test_get_monthlyBudget():
     """
     response = client.get(f"/monthlyBudget/{1}/{1}")
     assert response.status_code == 200
+
 
 # Test the endpoint for retrieving yearly expenses vs revenues bar chart.
 def test_get_yearlyExpensesVsRevenuesBar():
@@ -21,6 +23,7 @@ def test_get_yearlyExpensesVsRevenuesBar():
     response = client.get(f"/yearlyExpensesVsRevenuesBar/{1}")
     assert response.status_code == 200
 
+
 # Test the endpoint for retrieving yearly expenses vs revenues graph.
 def test_get_yearlyExpensesVsRevenuesGraph():
     """
@@ -29,6 +32,7 @@ def test_get_yearlyExpensesVsRevenuesGraph():
     response = client.get(f"/yearlyExpensesVsRevenuesGraph/{1}")
     assert response.status_code == 200
 
+
 # Test the endpoint for retrieving yearly balance graph.
 def test_get_yearlyBalanceGraph():
     """
@@ -36,6 +40,7 @@ def test_get_yearlyBalanceGraph():
     """
     response = client.get(f"/yearlyBalanceGraph/{1}")
     assert response.status_code == 200
+
 
 # Test the endpoint for retrieving yearly balance bar chart.
 def test_get_yearlyBalanceBar():

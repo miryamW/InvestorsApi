@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, validator, field_validator
+from pydantic import BaseModel, field_validator
 from app.services import users_service
 from app.models.operation_type import Operation_type
 
