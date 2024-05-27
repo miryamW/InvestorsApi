@@ -44,7 +44,7 @@ Welcome to the Budget Planning API! This server application is designed to assis
     │ │ ├─ operation.py                # Model for transaction operation
     │ │ ├─ operation_type.py           # Enum for operation types - expense and revenue
     │ │ └─ user_model.py               # Model for user
-    │ ├─ routers\
+    │ ├─ routes\
     │ │ ├─ operation_router.py         # Routes for transaction operations
     │ │ ├─ visualization_router.py     # Routes for data visualization
     │ │ └─ user_router.py              # Routes for user operations
@@ -54,8 +54,8 @@ Welcome to the Budget Planning API! This server application is designed to assis
     │ │ ├─ visualization_service.py   # Logic for data visualization
     │ │ └─ users_service.py            # Logic for user operations
     ├─ tests\
-    │ ├─ test_operation.py             # Tests for operation_service page
-    │ └─ test_user.py                  # Tests for user_service page
+    │ ├─ test_operation_service.py             # Tests for operation_service page
+    │ └─ test_users_service.py                  # Tests for user_service page
     ├─ utils\
     │ └─ log.py                     # Decorator for logs
     ├─ .gitignore                       # Project gitignore file
