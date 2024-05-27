@@ -5,26 +5,24 @@ from app.models.operation import Operation
 from app.services.db_service import operations
 from app.services import users_service
 
-"""get operation by id"""
-
 
 async def get_operation_by_id(operation_id):
+    """get operation by id"""
+
     operation = await operations.find_one({"id": operation_id})
     return Operation(**operation)
 
 
-"""get all operations for specific user"""
-
-
 async def get_all_operations(user_id: int):
+    """get all operations for specific user"""
     cursor = operations.find({"userId": int(user_id)})
     all_operations = await cursor.to_list(None)
     return [Operation(**operation) for operation in all_operations]
 
-"""get all operations for specific user between dates range"""
-
 
 async def get_all_operations_between_dates(user_id: int, start_date: str, end_date: str):
+    """get all operations for specific user between dates range"""
+
     start_date_time = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_time = datetime.strptime(end_date, "%Y-%m-%d")
     cursor = operations.find(
@@ -34,9 +32,11 @@ async def get_all_operations_between_dates(user_id: int, start_date: str, end_da
 
     # Assuming Operation is a class that can be instantiated with keyword arguments
     return [Operation(**operation) for operation in operations_in_range_list]
-"""add operation to db"""
+
 
 async def add_operation(operation: Operation):
+    """add operation to db"""
+
     operation_id = await get_operation_id()
     operations.insert_one({
         "id": operation_id,
@@ -51,10 +51,9 @@ async def add_operation(operation: Operation):
     return False
 
 
-"""update operation properties"""
-
-
 async def update_operation(operation_id: int, operation: Operation):
+    """update operation properties"""
+
     await operations.update_one({"id": operation_id}, {
         "$set": {"sum": operation.sum, "userId": operation.userId, "type": operation.type, "date": operation.date}})
     updated_operation = operations.find_one({"sum": operation.sum, "userId": operation.userId, "type": operation.type,
@@ -64,20 +63,18 @@ async def update_operation(operation_id: int, operation: Operation):
     return False
 
 
-"""delete operation"""
-
-
 async def delete_operation(operation_id: int):
+    """delete operation"""
+
     await operations.delete_one({"id": operation_id})
     if get_operation_by_id(operation_id):
         return True
     return False
 
 
-"""get next operation id"""
-
-
 async def get_operation_id():
+    """get next operation id"""
+
     max_id_operation = await operations.find_one({}, sort=[("id", DESCENDING)])
     if max_id_operation:
         return max_id_operation["id"] + 1

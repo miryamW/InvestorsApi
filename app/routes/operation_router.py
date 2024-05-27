@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, Request
-from app.middlewares.log import log
+from utils.log import log
 from app.models.operation import Operation
 from app.services import operations_service
 
