@@ -1,8 +1,13 @@
+import os
+import sys
+
 import pytest
 from datetime import datetime, timedelta
 from app.services import operations_service, users_service
 from app.models.operation import Operation
 from app.models.operation_type import Operation_type
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 @pytest.fixture
@@ -69,16 +74,17 @@ async def test_get_operation_by_id(operation_data):
 
 @pytest.mark.asyncio
 async def test_get_all_operations(operation_data):
-    current_id = await operations_service.get_operation_id()-1
+    current_id = await operations_service.get_operation_id() - 1
     result = await operations_service.get_all_operations(3)
     assert current_id in (v["id"] for v in result)
 
+
 @pytest.mark.asyncio
 async def test_get_operations_between_two_dates_for_user(operation_data):
-    current_id = await operations_service.get_operation_id()-1
+    current_id = await operations_service.get_operation_id() - 1
     result = await operations_service.get_all_operations_between_dates(operation_data.userId, (
             operation_data.date - timedelta(days=1)).strftime('%Y-%m-%d'), (operation_data.date + timedelta(
-        days=1)).strftime('%Y-%m-%d'))
+       days=1)).strftime('%Y-%m-%d'))
     assert current_id in (v.id for v in result)
 
 
