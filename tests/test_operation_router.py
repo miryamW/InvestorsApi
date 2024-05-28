@@ -27,14 +27,14 @@ def test_add_operation():
     """
     Test the operation addition endpoint.
     """
-    response = client.post("/", json={
+    assert client.post("/", json={
         "id": 1,
         "sum": 230.5,
         "userId": 1,
         "type": 'revenue',
         "date": "2024-01-22T15:49:07.376+00:00"
-    })
-    assert response.status_code == 200
+    }).status_code == 200
+
 
 
 # Test the functionality to get all operations for a user.

@@ -76,7 +76,7 @@ async def add_operation(operation: Operation):
         "id": operation_id,
         "sum": operation.sum,
         "userId": operation.userId,
-        "type": operation.type.value,
+        "type": operation.type,
         "date": operation.date
     })
     new_operation_created = await operations.find_one({"id": operation_id})

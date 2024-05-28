@@ -1,4 +1,5 @@
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from app.models.user import User
@@ -37,15 +38,14 @@ async def user_id():
 
 
 # Test the user signup functionality.
-def test_signup(user_data):
+def test_signup(user_data, user_data_inValid_password, user_data_inValid_username):
     """
     Test the user signup endpoint.
 
     Args:
         user_data (User): Sample user data provided by the user_data fixture.
     """
-    response = client.post("/signUp", json=user_data.__dict__)
-    assert response.status_code == 200
+    assert client.post("/signUp", json=user_data.__dict__).status_code == 200
 
 
 # Test the user signin functionality.
@@ -56,8 +56,7 @@ def test_signin(user_data):
     Args:
         user_data (User): Sample user data provided by the user_data fixture.
     """
-    response = client.post("/signIn", json=user_data.__dict__)
-    assert response.status_code == 200
+    assert client.post("/signIn", json=user_data.__dict__).status_code == 200
 
 
 # Test the user profile update functionality.
