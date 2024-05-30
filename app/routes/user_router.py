@@ -6,7 +6,7 @@ from app.models.user import User
 user_router = APIRouter()
 
 
-@user_router.post("/signIn")
+@user_router.post("/sign_in")
 @log
 async def signin(request: Request, user: User):
     """
@@ -28,7 +28,7 @@ async def signin(request: Request, user: User):
     raise HTTPException(status_code=404, detail="This user does not exist")
 
 
-@user_router.post("/signUp")
+@user_router.post("/sign_up")
 @log
 async def signup(request: Request, user: User):
     """

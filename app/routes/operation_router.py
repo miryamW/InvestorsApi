@@ -7,7 +7,7 @@ from app.services import operations_service
 operation_router = APIRouter()
 
 
-@operation_router.get('/allOperations/{user_id}', response_model=List[Operation])
+@operation_router.get('/all_operations/{user_id}', response_model=List[Operation])
 @log
 async def get_operations(request: Request, user_id: int):
     """
